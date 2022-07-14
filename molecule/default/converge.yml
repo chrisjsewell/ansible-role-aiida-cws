@@ -14,4 +14,4 @@
   - ansible_python_interpreter: /usr/bin/python3
 
   roles:
-  - role: "marvel-nccr.aiida_cws"
+  - role: "marvel-nccr.aiida-cws"

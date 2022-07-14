@@ -1,14 +1,14 @@
 [![CI](https://github.com/marvel-nccr/ansible-role-aiida-cws/workflows/CI/badge.svg)](https://github.com/marvel-nccr/ansible-role-aiida-cws/actions)
-[![Ansible Role](https://img.shields.io/ansible/role/25521.svg)](https://galaxy.ansible.com/marvel-nccr/aiida_cws)
+[![Ansible Role](https://img.shields.io/ansible/role/25521.svg)](https://galaxy.ansible.com/marvel-nccr/aiida-cws)
 [![Release](https://img.shields.io/github/tag/marvel-nccr/ansible-role-aiida-cws.svg)](https://github.com/marvel-nccr/ansible-role-aiida-cws/releases)
 
-# Ansible Role: marvel-nccr.aiida_cws
+# Ansible Role: marvel-nccr.aiida-cws
 
 An Ansible role that installs and configures an environment for running the AiiDA common-workflows.
 
 ## Installation
 
-`ansible-galaxy install marvel-nccr.aiida_cws`
+`ansible-galaxy install marvel-nccr.aiida-cws`
 
 ## Role Variables
 
@@ -19,7 +19,7 @@ See `defaults/main.yml`
 ```yaml
 - hosts: servers
   roles:
-  - role: marvel-nccr.aiida_cws
+  - role: marvel-nccr.aiida-cws
 ```
 
 ## Development and testing
@@ -28,11 +28,11 @@ This role uses [Molecule](https://molecule.readthedocs.io/en/latest/#) and [Dock
 
 After installing [Docker](https://www.docker.com/):
 
-Clone the repository into a package named `marvel-nccr.aiida_cws` (the folder must be named the same as the Ansible Galaxy name)
+Clone the repository into a package named `marvel-nccr.aiida-cws` (the folder must be named the same as the Ansible Galaxy name)
 
 ```bash
-git clone https://github.com/marvel-nccr/ansible-role-aiida-cws marvel-nccr.aiida_cws
-cd marvel-nccr.aiida_cws
+git clone https://github.com/marvel-nccr/ansible-role-aiida-cws marvel-nccr.aiida-cws
+cd marvel-nccr.aiida-cws
 ```
 
 Then run:
