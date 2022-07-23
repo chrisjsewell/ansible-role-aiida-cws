@@ -12,13 +12,17 @@ The primary goal is to create an environment that a user can enter and, without 
 aiida-common-workflows launch relax siesta --structure=Si -X siesta -n 2
 ```
 
-For all the available (open-source) simulation codes.
+For all the available (open-source) simulation codes: `abinit`, `cp2k`, `fleur`, `nwchem`, `qe`, `siesta`, `wannier90`, `yambo`.
 
 The key components are:
 
 - PostgreSQL installed system wide, with auto-start service.
 - RabbitMQ installed system wide, with auto-start service.
 - Conda installed system wide, with activation on terminals
+- The AiiDA python environment installed into the `aiida` Conda environment, including the `aiida-common-workflows` package, dependent plugins, and `jupyterlab`, then a profile is created.
+- Each simulation code, and their dependencies, are installed into their own Conda environment.
+  - Then an AiiDA `Code` is created for each code executable
+- The `aiida-pseudo` package is used to install the requisite pseudo potentials.
 
 ## Installation
 
@@ -88,7 +92,9 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 
 ## TODO
 
-- jupyter
+- move to building docker with [tini](https://github.com/krallin/tini) as PID 1
+  - What system service manager to use in place of systemd? (<https://github.com/krallin/tini/issues/175>)
+- jupyter lab launcher
 - rest api service
 - check everything still works with non-root user install
 - report on `du -sh /root` (8Gb) and `du -sh /root/.conda/envs/*`

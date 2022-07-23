@@ -19,11 +19,11 @@
   changed_when: "'Successfully installed' in aiida_pip_install.stdout"
   register: aiida_pip_install
 
-- name: Retrieve list of packages in aiida env
+- name: Retrieve list of core packages in aiida env
   conda_list:
     executable: "{{ conda_exec_user }}"
     env: "{{ conda_aiida_env }}"
-    regex: "^(aiida-.+|python)$"
+    regex: "^(aiida.+|python|jupyterlab)$"
   register: aiida_packages_list
 
 - name: Write aiida env packages to release notes

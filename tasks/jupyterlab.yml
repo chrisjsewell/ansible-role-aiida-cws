@@ -1,0 +1,11 @@
+- when: conda_aiida_core_version_major|int < 2
+  block:
+  - name: Create ipython config folder
+    file:
+      path: "${HOME}/.ipython/profile_default"
+      state: directory
+
+  - name: Add the aiida jupyter extension
+    copy:
+      src: ipython_config_v1.py
+      dest: "${HOME}/.ipython/profile_default"

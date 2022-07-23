@@ -40,6 +40,10 @@
   import_tasks: pseudopotentials.yml
   tags: [aiida_cws, aiida_cws_pps]
 
+- name: Jupyter lab releated set up
+  import_tasks: jupyterlab.yml
+  tags: [aiida_cws, aiida_cws_pps]
+
 - name: Create and start the aiida daemon service
   import_tasks: aiida-daemon.yml
   tags: [aiida_cws, aiida_cws_daemon]
