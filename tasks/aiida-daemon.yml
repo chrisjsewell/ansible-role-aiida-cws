@@ -1,0 +1,36 @@
+# Create aiida daemon service
+
+- name: Add AiiDA Daemon as system service (systemd)
+  become: true
+  become_user: "{{ root_user }}"
+  template:
+    src: aiida-daemon@.service
+    dest: /etc/systemd/system
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    daemon_user: "{{ current_user }}"
+    daemon_user_home: "{{ current_user_home }}"
+    daemon_verdi: "{{ aiida_run_verdi }}"
+  when: ansible_service_mgr == "systemd"
+
+- name: Start AiiDA Daemon system service (systemd)
+  become: true
+  become_user: "{{ root_user }}"
+  systemd:
+    name: aiida-daemon@{{ aiida_profile_name }}
+    enabled: true
+    masked: false
+    daemon-reload: true
+    state: started
+  when: ansible_service_mgr == "systemd"
+
+- block:
+  - name: Check if the AiiDA daemon is running (non-systemd)
+    ansible.builtin.command: "{{ aiida_run_verdi }} -p {{ aiida_profile_name }} daemon status"
+    changed_when: false
+  rescue:
+  - name: Start AiiDA Daemon (non-systemd)
+    ansible.builtin.command: "{{ aiida_run_verdi }} -p {{ aiida_profile_name }} daemon start"
+  when: ansible_service_mgr != "systemd"

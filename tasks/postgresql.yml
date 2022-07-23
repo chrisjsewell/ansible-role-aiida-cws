@@ -1,0 +1,77 @@
+# Install and start the postgresql service, and setup the database.
+
+- name: Install Postgresql apt dependencies
+  become: true
+  become_user: "{{ root_user }}"
+  ansible.builtin.apt:
+    name:
+    - postgresql
+    - postgresql-server-dev-all
+    - postgresql-client
+    - python3-psycopg2  # required for postgresql_db role
+
+- when: ansible_service_mgr == "systemd"
+  block:
+  - name: Start Postgresql service (systemd)
+    become: true
+    become_user: "{{ root_user }}"
+    service:
+      name: "postgresql"
+      state: "started"
+      enabled: true
+
+- when: ansible_service_mgr != "systemd"
+  block:
+  - name: Fetch location of the Postgresql binaries
+    ansible.builtin.command: find /usr/lib/postgresql/ -name bin
+    changed_when: false
+    register: aiida_postgres_bin_raw
+
+  - name: Set location of the Postgresql binaries
+    set_fact:
+      aiida_postgres_bin_location: "{{ aiida_postgres_bin_raw.stdout_lines[0] }}"
+
+  - name: Set data location for Postgresql
+    set_fact:
+      aiida_postgres_data_location: /var/lib/postgresql/data
+
+  - name: Initialize Postgresql DB cluster
+    become: true
+    become_user: "{{ aiida_postgres_user }}"
+    ansible.builtin.command: "{{ aiida_postgres_bin_location }}/initdb {{ aiida_postgres_data_location }}"
+    args:
+      creates: "{{ aiida_postgres_data_location }}/pg_hba.conf"
+
+  - name: Start Postgresql service (systemd)
+    become: true
+    become_user: "{{ root_user }}"
+    service:
+      name: "postgresql"
+      state: "started"
+      enabled: true
+
+- when: ansible_service_mgr != "systemd"
+  block:
+  - name: Check if Postgresql is running
+    shell: pgrep postgres
+    changed_when: false
+  rescue:
+  - name: Start Postgresql (non-systemd)
+    become: true
+    become_user: "{{ aiida_postgres_user }}"
+    ansible.builtin.command: "{{ aiida_postgres_bin_location }}/pg_ctl start -D {{ aiida_postgres_data_location }} -s -o '-p 5432' -w -t 300"
+
+- name: Setup Postgresql DB
+  become: true
+  become_user: "{{ aiida_postgres_user }}"
+  postgresql_db:
+    name: "{{ aiida_postgres_db }}"
+
+- name: Setup Postgresql DB user
+  become: true
+  become_user: "{{ aiida_postgres_user }}"
+  postgresql_user:
+    db: "{{ aiida_postgres_db }}"
+    name: "{{ aiida_postgres_db_user }}"
+    password: "{{ aiida_postgres_db_pw }}"
+    encrypted: true

@@ -1,0 +1,64 @@
+# create the aiida conda environment and setup the profile
+
+- name: "Create Conda {{ conda_aiida_env }} environment"
+  conda_install:
+    executable: "{{ conda_exec_user }}"
+    env: "{{ conda_aiida_env }}"
+    packages: "{{ conda_aiida_python_version | aiida_conda_packages(conda_aiida_core_version, conda_aiida_code_plugins, conda_aiida_add_packages) }}"
+    channels:
+    - conda-forge
+    - cjs14  # TODO can be removed once all packages uploaded to conda-forge
+  notify:
+  - conda clean
+  register: aiida_env_install
+
+- name: Install pip requirements into Conda {{ conda_aiida_env }} environment
+  # we use --no-deps though, so that we don't clobber any conda packages
+  when: conda_aiida_pip_packages
+  ansible.builtin.command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} pip install --no-deps {{ conda_aiida_pip_packages | join(' ') }}"
+  changed_when: "'Successfully installed' in aiida_pip_install.stdout"
+  register: aiida_pip_install
+
+- name: Run reentry scan on aiida-core v1
+  when: conda_aiida_core_version_major|int < 2 and (aiida_env_install.changed or aiida_pip_install.changed)
+  ansible.builtin.command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} reentry scan"
+  changed_when: false
+
+- name: "Activate verdi TAB completion in aiida env (v1)"
+  when: conda_aiida_core_version_major|int < 2
+  ansible.builtin.copy:
+    dest: "{{ conda_folder_user }}/envs/{{ conda_aiida_env }}/etc/conda/activate.d/verdi-complete.sh"
+    content: 'eval "$(verdi completioncommand)"'
+
+- name: "Activate verdi TAB completion in aiida env (v2)"
+  when: conda_aiida_core_version_major|int > 1
+  ansible.builtin.copy:
+    dest: "{{ conda_folder_user }}/envs/{{ conda_aiida_env }}/etc/conda/activate.d/verdi-complete.sh"
+    content: 'eval "$(_VERDI_COMPLETE=bash_source verdi)"'
+
+- name: add aiida data folder
+  become: true
+  become_user: "{{ root_user }}"
+  file:
+    path: "{{ aiida_data_folder_user }}"
+    state: "directory"
+    mode: 0755
+    owner: "{{ current_user }}"
+
+- name: Create aiida profile configuration
+  template:
+    src: aiida-profile.yml
+    dest: "{{ aiida_data_folder_user }}/profile.yml"
+
+- name: "Check if AiiDA profile '{{ aiida_profile_name }}' has already been configured"
+  shell: "{{ aiida_run_verdi }} profile show {{ aiida_profile_name }}"
+  failed_when: false
+  changed_when: false
+  register: aiida_profile_show
+
+- name: "Set up AiiDA profile"
+  shell: |
+    {{ aiida_run_verdi }} setup \
+    --non-interactive \
+    --config {{ aiida_data_folder_user }}/profile.yml
+  when: aiida_profile_show.rc != 0

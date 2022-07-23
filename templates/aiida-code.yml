@@ -1,0 +1,7 @@
+label: "{{ _aiida_code_label }}"
+description: "{{ _aiida_code_description }}"
+input_plugin: "{{ _aiida_code_plugin }}"
+remote_abs_path: "{{ _aiida_code_executable }}"
+computer: "{{ _aiida_computer_label }}"
+on_computer: true
+prepend_text: "ulimit -s unlimited"

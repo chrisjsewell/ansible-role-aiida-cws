@@ -1,0 +1,17 @@
+# Create aiida codes for a given aiida plugin
+
+- name: "Create the Conda env: {{ aiida_code.code_env }}"
+  conda_install:
+    executable: "{{ conda_exec_user }}"
+    env: "{{ aiida_code.code_env }}"
+    packages: "{{ aiida_code.code_packages }}"
+  notify:
+  - conda clean
+
+- name: "Setup the codes associated with {{ aiida_code.code_env }}"
+  include_tasks: aiida-code-plugin.yml
+  loop: "{{ aiida_code.plugins | dict2items }}"
+  loop_control:
+    loop_var: aiida_plugin
+  vars:
+    aiida_code_label: "{{ aiida_code.code_env }}-{{ aiida_plugin.key }}"

@@ -1,6 +1,5 @@
 dependency:
   name: galaxy
-  # requirements_file: molecule/default/requirements.yml
 driver:
   name: docker
 platforms:

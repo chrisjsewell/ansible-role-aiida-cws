@@ -1,9 +1,40 @@
-# Add task instructions here
+# The main task file
 
-# - include_tasks: setup-ubuntu-16.04.yml
-#   when: ansible_distribution == 'Ubuntu' \
-#         and ansible_distribution_version == '16.04'
-#
-# - include_tasks: setup-ubuntu-18.04.yml
-#   when: ansible_distribution == 'Ubuntu' \
-#         and ansible_distribution_version == '18.04'
+- name: Initialise the role
+  import_tasks: initialise.yml
+  tags: [aiida_cws, always]
+
+- name: Install PostGreSQL and start service
+  import_tasks: postgresql.yml
+  tags: [aiida_cws]
+
+- name: Install RabbitMQ and start service
+  import_tasks: rabbitmq.yml
+  tags: [aiida_cws]
+
+- name: Install Conda and initialise base environment
+  import_tasks: conda.yml
+  tags: [aiida_cws]
+
+- name: Create aiida environment and profile
+  import_tasks: aiida-env.yml
+  tags: [aiida_cws]
+
+- name: Create an aiida computer
+  import_tasks: aiida-computer.yml
+  tags: [aiida_cws]
+
+- name: Create aiida codes for the available plugins
+  include_tasks: aiida-code.yml
+  loop: "{{ conda_aiida_code_plugins }}"
+  loop_control:
+    loop_var: aiida_code
+  tags: [aiida_cws]
+
+- name: Download an install pseudo-potential families
+  import_tasks: pseudopotentials.yml
+  tags: [aiida_cws]
+
+- name: Create and start the aiida daemon service
+  import_tasks: aiida-daemon.yml
+  tags: [aiida_cws]

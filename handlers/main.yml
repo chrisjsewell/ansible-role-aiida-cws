@@ -1,0 +1,2 @@
+- name: conda clean
+  command: "{{ conda_exec_user }} clean --yes --all"

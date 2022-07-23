@@ -1,0 +1,33 @@
+# Create an aiida computer
+
+- name: check if the AiiDA computer is already present
+  shell: "{{ aiida_run_verdi }} computer show {{ aiida_computer_label }}"
+  ignore_errors: true
+  no_log: True
+  changed_when: false
+  register: aiida_check_computer
+
+- name: "Copy the configuration for the {{ aiida_computer_label }} AiiDA computer"
+  template:
+    src: "aiida-computer.yml"
+    dest: "{{ aiida_data_folder_user }}/{{ aiida_computer_label }}.yml"
+    mode: 0755
+  vars:
+    _aiida_computer_work_dir: "{{ aiida_computer_run_folder |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+    _aiida_computer_label: "{{ aiida_computer_label }}"
+    _aiida_computer_hostname: "{{ aiida_computer_hostname }}"
+    _aiida_computer_transport: "{{ aiida_computer_transport }}"
+    _aiida_computer_scheduler: "{{ aiida_computer_scheduler }}"
+    _aiida_computer_mpirun: "{{ aiida_computer_mpirun }}"
+    _aiida_computer_default_cpus: "{{ aiida_computer_default_cpus }}"
+  when: aiida_check_computer.rc != 0
+
+- name: "Setup {{ aiida_computer_label }} computer for AiiDA"
+  shell: |
+    {{ aiida_run_verdi }} computer setup \
+      --non-interactive --config "{{ aiida_data_folder_user }}/{{ aiida_computer_label }}.yml"
+  when: aiida_check_computer.rc != 0
+
+- name: "Configure {{ aiida_computer_label }}"
+  shell: "{{ aiida_run_verdi }} computer configure {{ aiida_computer_transport }} {{ aiida_computer_label }} --safe-interval 0 --non-interactive"
+  when: aiida_check_computer.rc != 0

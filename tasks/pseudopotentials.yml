@@ -1,0 +1,17 @@
+- name: "Add aiida-pseudo SSSP families"
+  ansible.builtin.command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} aiida-pseudo install sssp -v {{ sssp.version }} -x {{ sssp.functional }} -p {{ sssp.protocol }}"
+  failed_when: "sssp_install.rc != 0 and 'already installed' not in sssp_install.stderr"
+  changed_when: "'already installed' not in sssp_install.stderr"
+  register: sssp_install
+  loop: "{{ aiida_pseudos_sssp }}"
+  loop_control:
+    loop_var: sssp
+
+- name: "Add aiida-pseudo DOJO families"
+  ansible.builtin.command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} aiida-pseudo install pseudo-dojo -v {{ dojo.version }} -x {{ dojo.functional }} -r {{ dojo.relativistic }} -p {{ dojo.protocol }} -f {{ dojo.pseudo_format }}"
+  failed_when: "dojo_install.rc != 0 and 'already installed' not in dojo_install.stderr"
+  changed_when: "'already installed' not in dojo_install.stderr"
+  register: dojo_install
+  loop: "{{ aiida_pseudos_dojo }}"
+  loop_control:
+    loop_var: dojo

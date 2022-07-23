@@ -1,1 +1,174 @@
 # in this file add variables to be used in the tasks
+
+# general
+root_user: root
+aiida_temp_folder: /tmp
+_aiida_data_folder: "${HOME}/.local/share/aiida"
+
+# postgresql install
+aiida_postgres_user: postgres
+
+# postgresql database
+aiida_postgres_host: localhost
+aiida_postgres_port: 5432
+aiida_postgres_db: aiidadb
+aiida_postgres_db_pw: "ne9N_LDK-*JSS"
+aiida_postgres_db_user: aiida
+
+# conda base install
+_conda_folder: "${HOME}/.conda"
+_conda_exec: "{{ _conda_folder }}/bin/mamba"
+conda_installer_sh: "{{ aiida_temp_folder }}/conda_installer.sh"
+conda_installer_url: https://github.com/conda-forge/miniforge/releases/download/4.12.0-2/Mambaforge-4.12.0-2-Linux-x86_64.sh
+conda_installer_checksum: sha256:8cb16ef82fe18d466850abb873c7966090b0fbdcf1e80842038e0b4e6d8f0b66
+conda_installer_timeout: 300  # seconds
+conda_base_packages: []
+
+# aiida conda env
+conda_aiida_env: "aiida"
+conda_aiida_python_version: "3.8"
+conda_aiida_core_version: "1.6"
+conda_aiida_core_version_major: "{{ (conda_aiida_core_version|string).split('.')[0] }}"
+conda_aiida_add_packages:
+- ipykernel
+- jupyterlab=3
+- jupyterlab-lsp 
+- jupyter-lsp-python 
+- jupyterlab-spellchecker
+- aiida-core.rest
+- aiida-core.notebook
+- aiida-pseudo
+- aiida_conda_scheduler
+- aiida-bigdft=0.2.6
+- aiida-castep=1.3.0
+- aiida-gaussian=1.4.3
+- aiida-orca=0.5.1
+- aiida-vasp=2.1.1
+- aiida-wannier90_workflows=1.0.2
+- mendeleev<0.10.0  # for aiida-fleur 1.3.1, only when using aiida 1.6 -> sqlalchemy != 1.4
+# abipy is required by aiida-abinit but is not listed as a dependency in v0.2.0,
+# also the abipy recipe does not pin dependencies, so we have to do it specifically
+- abipy=0.8  # we can't use 0.9 because the pymatgen version is incomatible with aiida-common-workflows
+- pymatgen<2021.3.3  # required by abipy 0.8
+- apscheduler=2.1.0  # required by abipy 0.8, note this is sourced from the cjs14 channel
+
+# these are requirements which are not yet on conda
+# we use --no-deps though, so that we don't clobber any conda packages
+conda_aiida_pip_packages:
+- git+https://github.com/aiidateam/aiida-common-workflows.git@db0f1ae125e045183f69cd42d09f58fd69c2bff8
+
+# aiida profile
+aiida_profile_name: generic
+aiida_profile_first_name: Max
+aiida_profile_last_name: Scientist
+aiida_profile_institution: Quantum Mobile
+aiida_profile_email: aiida@localhost
+aiida_database_backend: "{{ 'django' if conda_aiida_core_version_major|int < 2 else 'psql_dos' }}"
+
+# aiida computers
+aiida_computer_label: local_direct_conda
+aiida_computer_hostname: localhost
+aiida_computer_scheduler: conda.direct
+aiida_computer_transport: "{{ 'local' if  conda_aiida_core_version_major|int < 2 else 'core.local' }}"
+aiida_computer_run_folder: "${HOME}/.aiida_run"
+aiida_computer_mpirun: "mpirun -np {tot_num_mpiprocs}"
+aiida_computer_default_cpus: 2
+
+aiida_pseudos_sssp:
+- version: "1.1"
+  functional: PBE
+  protocol: efficiency
+- version: "1.1"
+  functional: PBE
+  protocol: precision
+
+aiida_pseudos_dojo:
+# used by https://github.com/aiidateam/aiida-common-workflows/blob/db0f1ae125e045183f69cd42d09f58fd69c2bff8/aiida_common_workflows/workflows/relax/siesta/protocol.yml
+- version: "0.4"
+  functional: PBE
+  relativistic: FR
+  protocol: standard
+  pseudo_format: psml
+# used by https://github.com/aiidateam/aiida-common-workflows/blob/db0f1ae125e045183f69cd42d09f58fd69c2bff8/aiida_common_workflows/workflows/relax/abinit/protocol.yml
+- version: "1.0"
+  functional: PBE
+  relativistic: SR
+  protocol: standard
+  pseudo_format: jthxml
+
+# aiida code plugins
+# these are plugins and their codes, which are both available on conda-forge
+conda_aiida_code_plugins:
+
+- plugin_package: aiida-abinit
+  plugin_version: "0.2.0a1"
+  code_packages:
+  # - aiida-abinit.code=0.2.0a1  # TODO
+  - abinit=9
+  code_env: "abinit"
+  plugins:
+    abinit: "abinit"
+
+- plugin_package: aiida-cp2k
+  plugin_version: "1.5.0"
+  code_packages:
+  # - aiida-cp2k.code=1.5.0  # TODO
+  - "cp2k=7.*=*openmpi*"  # ensure the mpi version is installed
+  code_env: "cp2k"
+  plugins:
+    cp2k: "cp2k.psmp"
+
+- plugin_package: aiida-fleur
+  plugin_version: "1.3.1"
+  code_packages:
+  - aiida-fleur.code=1.3.1
+  code_env: "fleur"
+  plugins:
+    fleur.fleur: "fleur_MPI"
+    fleur.inpgen: inpgen
+
+- plugin_package: aiida-nwchem
+  plugin_version: "2.1.0"
+  code_packages: 
+  - aiida-nwchem.code=2.1.0
+  code_env: "nwchem"
+  plugins:
+    nwchem.nwchem: "nwchem"
+
+- plugin_package: aiida-quantumespresso
+  plugin_version: "3.5.2"
+  code_packages: 
+  - aiida-quantumespresso.code=3.5.2
+  code_env: "qe"
+  plugins:
+    quantumespresso.cp: "cp.x"
+    quantumespresso.neb: "neb.x"
+    quantumespresso.ph: "ph.x"
+    quantumespresso.pp: "pp.x"
+    quantumespresso.pw: "pw.x"
+
+- plugin_package: aiida-siesta
+  plugin_version: "1.3.0"
+  code_packages:
+  - aiida-siesta.code=1.3.0
+  - siesta=*=mpi*  # ensure the mpi version is installed
+  code_env: "siesta"
+  plugins:
+    siesta.siesta: "siesta"
+
+- plugin_package: aiida-wannier90
+  plugin_version: "2.0.1"
+  code_packages:
+  - aiida-wannier90.code=2.0.1
+  code_env: "wannier90"
+  plugins:
+    wannier90.wannier90: "wannier90.x"
+
+- plugin_package: aiida-yambo
+  plugin_version: "1.3.0"
+  code_packages:
+  # - aiida-yambo.code=1.3.0  # TODO
+  - yambo=5
+  code_env: "yambo"
+  plugins:
+    yambo.yambo: "yambo"

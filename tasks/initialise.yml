@@ -1,0 +1,91 @@
+# initialise the role
+
+- name: Store current user
+  when: current_user is undefined
+  ansible.builtin.command: "whoami"
+  changed_when: false
+  check_mode: false
+  register: current_user_cmd
+
+- name: Set current user
+  when: current_user is undefined
+  set_fact:
+    current_user: "{{ current_user_cmd.stdout }}"
+
+- name: store current user $HOME
+  when: current_user_home is undefined
+  ansible.builtin.command: "echo $HOME"
+  changed_when: false
+  check_mode: false
+  register: current_user_home_cmd
+
+- name: Set current user home
+  when: current_user_home is undefined
+  set_fact:
+    current_user_home: "{{ current_user_home_cmd.stdout }}"
+
+- name: Set user aiida_data_folder
+  set_fact:
+    aiida_data_folder_user: "{{ _aiida_data_folder |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+
+- name: Set user conda_folder
+  set_fact:
+    conda_folder_user: "{{ _conda_folder |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+
+- name: Set user conda_exec
+  set_fact:
+    conda_exec_user: "{{ _conda_exec |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+
+- name: Set user conda_run_verdi
+  set_fact:
+    aiida_run_verdi: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} verdi"
+
+- name: ensure that {{ aiida_temp_folder }} directory exists
+  ansible.builtin.file:
+    path: "{{ aiida_temp_folder }}"
+    state: directory
+
+- name: Install shared apt packages
+  become: true
+  become_user: "{{ root_user }}"
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+    name:
+    - vim  # required for manual verdi code/computer setup
+    - ssh  # required by MPI
+    - git  # useful for cloning repositories
+    - python3-pkg-resources  # required by the pip ansible module
+
+- name: Set default OMP_NUM_THREADS=1
+  # see https://github.com/marvel-nccr/quantum-mobile/issues/187
+  # add to ${HOME}/.profile as well?
+  ansible.builtin.lineinfile:
+    path: "${HOME}/.bashrc"
+    regexp: "^export OMP_NUM_THREADS=.*"
+    line: export OMP_NUM_THREADS=1
+
+- name: Fix for running aiida processes on root
+  # get `mesg: ttyname failed: Inappropriate ioctl for device` when running aiida processes on root
+  # see: https://superuser.com/a/1277604
+  when: current_user == root_user
+  become: true
+  become_user: "{{ root_user }}"
+  ansible.builtin.replace:
+    path: "/root/.profile"
+    regexp: "^mesg n"
+    replace: "test -t 0 && mesg n"
+
+- name: Fix for running openmpi on root
+  # see: https://github.com/open-mpi/ompi/pull/5597/files
+  # note: could use `--allow-run-on-root` in the mpirun command, but this is not supported by mpich
+  # important running as root should only be done in a container
+  when: current_user == root_user
+  become: true
+  become_user: "{{ root_user }}"
+  ansible.builtin.blockinfile:
+    path: "${HOME}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK (root only)"
+    block: |
+      export OMPI_ALLOW_RUN_AS_ROOT=1
+      export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
