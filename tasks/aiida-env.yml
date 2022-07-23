@@ -19,6 +19,25 @@
   changed_when: "'Successfully installed' in aiida_pip_install.stdout"
   register: aiida_pip_install
 
+- name: Retrieve list of packages in aiida env
+  conda_list:
+    executable: "{{ conda_exec_user }}"
+    env: "{{ conda_aiida_env }}"
+    regex: "^(aiida-.+|python)$"
+  register: aiida_packages_list
+
+- name: Write aiida env packages to release notes
+  ini_file:
+    path: "{{ release_notes }}"
+    section: "AiiDA packages"
+    option: "{{ pkg.name }}"
+    value: "{{ pkg.version }}-{{ pkg.build_string }}@{{ pkg.channel }}"
+    create: true
+  loop: "{{ aiida_packages_list.output }}"
+  loop_control:
+    loop_var: pkg
+    label: "{{ pkg.name }}"
+
 - name: Run reentry scan on aiida-core v1
   when: conda_aiida_core_version_major|int < 2 and (aiida_env_install.changed or aiida_pip_install.changed)
   ansible.builtin.command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} reentry scan"
@@ -56,7 +75,7 @@
   changed_when: false
   register: aiida_profile_show
 
-- name: "Set up AiiDA profile"
+- name: "Set up AiiDA profile '{{ aiida_profile_name }}'"
   shell: |
     {{ aiida_run_verdi }} setup \
     --non-interactive \

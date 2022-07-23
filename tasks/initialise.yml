@@ -26,15 +26,15 @@
 
 - name: Set user aiida_data_folder
   set_fact:
-    aiida_data_folder_user: "{{ _aiida_data_folder |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+    aiida_data_folder_user: "{{ aiida_data_folder_temp |  regex_replace('\\$\\{HOME}', current_user_home) }}"
 
 - name: Set user conda_folder
   set_fact:
-    conda_folder_user: "{{ _conda_folder |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+    conda_folder_user: "{{ conda_folder_temp |  regex_replace('\\$\\{HOME}', current_user_home) }}"
 
 - name: Set user conda_exec
   set_fact:
-    conda_exec_user: "{{ _conda_exec |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+    conda_exec_user: "{{ conda_exec_temp |  regex_replace('\\$\\{HOME}', current_user_home) }}"
 
 - name: Set user conda_run_verdi
   set_fact:
@@ -56,6 +56,13 @@
     - ssh  # required by MPI
     - git  # useful for cloning repositories
     - python3-pkg-resources  # required by the pip ansible module
+
+- name: Set default MAMBA_NO_BANNER=1
+  # see https://github.com/mamba-org/mamba/issues/587#issuecomment-762998474
+  ansible.builtin.lineinfile:
+    path: "${HOME}/.bashrc"
+    regexp: "^export MAMBA_NO_BANNER=.*"
+    line: export MAMBA_NO_BANNER=1
 
 - name: Set default OMP_NUM_THREADS=1
   # see https://github.com/marvel-nccr/quantum-mobile/issues/187

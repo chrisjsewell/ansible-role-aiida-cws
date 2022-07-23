@@ -10,32 +10,32 @@
 - when: not conda_binary.stat.exists
   block:
 
-    - name: "download: {{ conda_installer_url }}"
-      become: true
-      become_user: "{{ root_user }}"
-      ansible.builtin.get_url:
-        url: "{{ conda_installer_url }}"
-        dest: "{{ conda_installer_sh }}"
-        timeout: "{{ conda_installer_timeout }}"
-        checksum: "{{ conda_installer_checksum }}"
-        mode: 0755
+  - name: "download: {{ conda_installer_url }}"
+    become: true
+    become_user: "{{ root_user }}"
+    ansible.builtin.get_url:
+      url: "{{ conda_installer_url }}"
+      dest: "{{ conda_installer_sh }}"
+      timeout: "{{ conda_installer_timeout }}"
+      checksum: "{{ conda_installer_checksum }}"
+      mode: 0755
 
-    - name: "run: {{ conda_installer_url }}"
-      ansible.builtin.shell: bash {{ conda_installer_sh }} -b -p {{ conda_folder_user }}
-      args:
-        creates: "{{ conda_folder_user }}"
+  - name: "run: {{ conda_installer_url }}"
+    ansible.builtin.shell: bash {{ conda_installer_sh }} -b -p {{ conda_folder_user }}
+    args:
+      creates: "{{ conda_folder_user }}"
 
-    - name: "Initialise conda"
-      ansible.builtin.command: "{{ conda_exec_user }} init"
-      changed_when: false
+  - name: "Initialise conda"
+    ansible.builtin.command: "{{ conda_exec_user }} init"
+    changed_when: false
 
   always:
-    - name: deleting conda installer...
-      become: true
-      become_user: "{{ root_user }}"
-      ansible.builtin.file:
-        path: "{{ conda_installer_sh }}"
-        state: absent
+  - name: deleting conda installer...
+    become: true
+    become_user: "{{ root_user }}"
+    ansible.builtin.file:
+      path: "{{ conda_installer_sh }}"
+      state: absent
 
 - name: Install additional conda base packages
   when: conda_base_packages
@@ -45,17 +45,29 @@
   notify:
   - conda clean
 
+- name: "Create additional conda envs"
+  loop: "{{ conda_add_envs }}"
+  loop_control:
+    loop_var: conda_env
+    label: "{{ conda_env.name }}"
+  conda_install:
+    executable: "{{ conda_exec_user }}"
+    env: "{{ conda_env.name }}"
+    packages: "{{ conda_env.packages }}"
+  notify:
+  - conda clean
+
 - name: Set `workon` alias to `conda activate`
   ansible.builtin.lineinfile:
     path: "${HOME}/.bashrc"
     regexp: "^alias workon=.*"
     line: 'alias workon="conda activate"'
 
-- name: Set `runon` alias to `conda --live-stream run -n`
+- name: Set `runon` alias to `conda run --live-stream -n`
   ansible.builtin.lineinfile:
     path: "${HOME}/.bashrc"
     regexp: "^alias runon=.*"
-    line: 'alias runon="conda --live-stream run -n"'
+    line: 'alias runon="conda run --live-stream -n"'
 
 - name: Set `listenvs` alias to `conda info --envs`
   ansible.builtin.lineinfile:

@@ -6,35 +6,62 @@
 
 - name: Install PostGreSQL and start service
   import_tasks: postgresql.yml
-  tags: [aiida_cws]
+  tags: [aiida_cws, aiida_cws_postgres]
 
 - name: Install RabbitMQ and start service
   import_tasks: rabbitmq.yml
-  tags: [aiida_cws]
+  tags: [aiida_cws, aiida_cws_rabbitmq]
 
 - name: Install Conda and initialise base environment
   import_tasks: conda.yml
-  tags: [aiida_cws]
+  tags: [aiida_cws, aiida_cws_conda]
 
 - name: Create aiida environment and profile
   import_tasks: aiida-env.yml
-  tags: [aiida_cws]
+  tags: [aiida_cws, aiida_cws_env]
 
-- name: Create an aiida computer
-  import_tasks: aiida-computer.yml
-  tags: [aiida_cws]
+- name: Create aiida computers
+  include_tasks: aiida-computer.yml
+  loop: "{{ aiida_computers }}"
+  loop_control:
+    loop_var: aiida_computer
+    label: "{{ aiida_computer.label }}"
+  tags: [aiida_cws, aiida_cws_computer]
 
 - name: Create aiida codes for the available plugins
   include_tasks: aiida-code.yml
   loop: "{{ conda_aiida_code_plugins }}"
   loop_control:
     loop_var: aiida_code
-  tags: [aiida_cws]
+    label: "{{ aiida_code.plugin_package }}"
+  tags: [aiida_cws, aiida_cws_code]
 
 - name: Download an install pseudo-potential families
   import_tasks: pseudopotentials.yml
-  tags: [aiida_cws]
+  tags: [aiida_cws, aiida_cws_pps]
 
 - name: Create and start the aiida daemon service
   import_tasks: aiida-daemon.yml
-  tags: [aiida_cws]
+  tags: [aiida_cws, aiida_cws_daemon]
+
+# finalise
+
+- name: Gather apt package facts
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: Add system package installs to the release notes
+  ini_file:
+    path: "{{ release_notes }}"
+    section: "System packages"
+    option: "{{ pkg }}"
+    value: "{{ ansible_facts.packages[pkg][0].version }}"
+    create: true
+  loop:
+  - postgresql
+  - rabbitmq-server
+  - git
+  - vim
+  loop_control:
+    loop_var: pkg
+  when: pkg in ansible_facts.packages and ansible_facts.packages[pkg]

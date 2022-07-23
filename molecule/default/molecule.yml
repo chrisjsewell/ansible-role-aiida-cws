@@ -20,6 +20,8 @@ provisioner:
   # log: true  # for debugging
   playbooks:
     converge: converge.yml
+  # ansible_args:
+  # - --tags="aiida_cws"
   config_options:
     defaults:
       # nicer stdout printing

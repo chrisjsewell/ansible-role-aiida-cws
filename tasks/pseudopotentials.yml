@@ -15,3 +15,16 @@
   loop: "{{ aiida_pseudos_dojo }}"
   loop_control:
     loop_var: dojo
+
+- name: Retrieve aiida pseudopotentials
+  command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} aiida-pseudo list --raw --project label"
+  changed_when: false
+  register: aiida_pseudos_list
+
+- name: write aiida pseudos to release notes
+  ini_file:
+    path: "{{ release_notes }}"
+    section: "AiiDA profile"
+    option: "pseudopotentials"
+    value: "{{ aiida_pseudos_list.stdout.split('\n') | join(', ') }}"
+    create: true

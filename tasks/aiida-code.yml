@@ -1,17 +1,42 @@
-# Create aiida codes for a given aiida plugin
+# Create aiida codes for a given aiida plugin, from `aiida_code` dict
 
-- name: "Create the Conda env: {{ aiida_code.code_env }}"
+- name: "Create the Conda env: {{ aiida_code.conda_env }}"
   conda_install:
     executable: "{{ conda_exec_user }}"
-    env: "{{ aiida_code.code_env }}"
+    env: "{{ aiida_code.conda_env }}"
     packages: "{{ aiida_code.code_packages }}"
   notify:
   - conda clean
 
-- name: "Setup the codes associated with {{ aiida_code.code_env }}"
+- name: "Setup the codes associated with {{ aiida_code.conda_env }}"
   include_tasks: aiida-code-plugin.yml
-  loop: "{{ aiida_code.plugins | dict2items }}"
+  loop: "{{ aiida_code.codes }}"
   loop_control:
     loop_var: aiida_plugin
-  vars:
-    aiida_code_label: "{{ aiida_code.code_env }}-{{ aiida_plugin.key }}"
+
+- name: Write the {{ aiida_code.conda_env }} executables to the release notes
+  ini_file:
+    path: "{{ release_notes }}"
+    section: "Code environment: {{ aiida_code.conda_env }}"
+    option: "executables"
+    value: "{{ aiida_code.codes | map(attribute='exec') | join(', ') }}"
+    create: true
+
+- name: Retrieve list of packages to document in {{ aiida_code.conda_env }} env
+  conda_list:
+    executable: "{{ conda_exec_user }}"
+    env: "{{ aiida_code.conda_env }}"
+    regex: "^({{ aiida_code.doc_packages }}|openmpi|mpich)$"
+  register: env_packages_list
+
+- name: Write {{ aiida_code.conda_env }} env packages to release notes
+  ini_file:
+    path: "{{ release_notes }}"
+    section: "Code environment: {{ aiida_code.conda_env }}"
+    option: "{{ pkg.name }}"
+    value: "{{ pkg.version }}-{{ pkg.build_string }}@{{ pkg.channel }}"
+    create: true
+  loop: "{{ env_packages_list.output }}"
+  loop_control:
+    loop_var: pkg
+    label: "{{ pkg.name }}"

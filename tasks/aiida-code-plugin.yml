@@ -1,28 +1,34 @@
 # Create an aiida code for a given plugin entry point
 
-- name: "Check if {{ aiida_code_label }} is already present"
-  shell: "{{ aiida_run_verdi }} code show {{ aiida_code_label }}@{{ aiida_computer_label }}"
+- name: "Check if '{{ aiida_plugin.label }}' Code is already present"
+  shell: "{{ aiida_run_verdi }} code show {{ aiida_plugin.label }}@{{ conda_aiida_code_computer }}"
   ignore_errors: true
-  no_log: True
+  no_log: true
   changed_when: false
   register: aiida_check_code
 
 - when: aiida_check_code.rc != 0
   block:
 
-  - name: "Copy the configuration for the {{ aiida_code_label }} AiiDA code"
+  - name: Check that the code executable exists
+    stat:
+      path: "{{ conda_folder_user }}/envs/{{ aiida_code.conda_env }}/bin/{{ aiida_plugin.exec }}"
+    failed_when: not _exec_stat_result.stat.exists
+    register: _exec_stat_result
+
+  - name: "Copy the configuration for the {{ aiida_plugin.label }} AiiDA code"
     template:
       src: "aiida-code.yml"
-      dest: "{{ aiida_data_folder_user }}/{{ aiida_code_label }}.yml"
+      dest: "{{ aiida_data_folder_user }}/{{ aiida_plugin.label }}.yml"
       mode: 0755
     vars:
-      _aiida_code_label: "{{ aiida_code_label }}"
-      _aiida_code_description: "{{ aiida_plugin.key }} plugin for env={{ aiida_code.code_env }}"
-      _aiida_code_plugin: "{{ aiida_plugin.key }}"
-      _aiida_code_executable: "{{ conda_folder_user }}/envs/{{ aiida_code.code_env }}/bin/{{ aiida_plugin.value }}"
-      _aiida_computer_label: "{{ aiida_computer_label }}"
+      _aiida_code_label: "{{ aiida_plugin.label }}"
+      _aiida_code_description: "{{ aiida_plugin.plugin }} plugin, using the conda env={{ aiida_code.conda_env }}"
+      _aiida_code_plugin: "{{ aiida_plugin.plugin }}"
+      _aiida_code_executable: "{{ conda_folder_user }}/envs/{{ aiida_code.conda_env }}/bin/{{ aiida_plugin.exec }}"
+      _aiida_computer_label: "{{ conda_aiida_code_computer }}"
 
-  - name: "Setup {{ aiida_code_label }} code for AiiDA"
+  - name: "Setup {{ aiida_plugin.label }} code for AiiDA"
     shell: |
       {{ aiida_run_verdi }} code setup --non-interactive\
-        --config "{{ aiida_data_folder_user }}/{{ aiida_code_label }}.yml"
+        --config "{{ aiida_data_folder_user }}/{{ aiida_plugin.label }}.yml"
