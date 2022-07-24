@@ -2,7 +2,7 @@
 #
 - name: Install RabbitMQ apt dependencies
   become: true
-  become_user: "{{ root_user }}"
+  become_user: "{{ aiida_root_user }}"
   ansible.builtin.apt:
     name:
     - rabbitmq-server
@@ -12,14 +12,14 @@
   # see https://github.com/marvel-nccr/quantum-mobile/issues/111
   - name: Ensure correct RabbitMQ shutdown (systemd)
     become: true
-    become_user: "{{ root_user }}"
+    become_user: "{{ aiida_root_user }}"
     lineinfile:
       path: /lib/systemd/system/rabbitmq-server.service
       regexp: ExecStop=/usr/sbin/rabbitmqctl stop
       line: ExecStop=/usr/sbin/rabbitmqctl shutdown
   - name: Start RabbitMQ service (systemd)
     become: true
-    become_user: "{{ root_user }}"
+    become_user: "{{ aiida_root_user }}"
     service:
       name: "rabbitmq-server"
       state: "started"
@@ -33,5 +33,5 @@
   rescue:
   - name: Start RabbitMQ (non-systemd)
     become: true
-    become_user: "{{ root_user }}"
+    become_user: "{{ aiida_root_user }}"
     shell: rabbitmq-server > /dev/null 2>&1 &

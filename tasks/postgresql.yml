@@ -2,7 +2,7 @@
 
 - name: Install Postgresql apt dependencies
   become: true
-  become_user: "{{ root_user }}"
+  become_user: "{{ aiida_root_user }}"
   ansible.builtin.apt:
     name:
     - postgresql
@@ -14,7 +14,7 @@
   block:
   - name: Start Postgresql service (systemd)
     become: true
-    become_user: "{{ root_user }}"
+    become_user: "{{ aiida_root_user }}"
     service:
       name: "postgresql"
       state: "started"
@@ -44,7 +44,7 @@
 
   - name: Start Postgresql service (systemd)
     become: true
-    become_user: "{{ root_user }}"
+    become_user: "{{ aiida_root_user }}"
     service:
       name: "postgresql"
       state: "started"

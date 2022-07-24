@@ -40,6 +40,20 @@ See `defaults/main.yml`
 - hosts: servers
   roles:
   - role: marvel-nccr.aiida-cws
+    vars:
+      aiida_timezone_name: Europe/Zurich
+```
+
+If you want to install SLURM and use it as the scheduler, you can use e.g.:
+
+```yaml
+- hosts: servers
+  roles:
+  - role: marvel-nccr.slurm
+  - role: marvel-nccr.aiida-cws
+    vars:
+      aiida_timezone_name: Europe/Zurich
+      aiida_conda_code_computer: local_slurm_conda
 ```
 
 ## Usage
@@ -51,7 +65,7 @@ Once logged in to a terminal, the `base` environment of Conda is activated. To c
 The alias `listenvs` (for `conda env --info`) can be used to list the available environments:
 
 ```shell
-(base) root@instance:/# listenvs 
+(base) root@instance:/# listenvs
 # conda environments:
 #
 base                  *  /root/.conda
@@ -211,7 +225,7 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 - rest api service
 - check everything still works with non-root user install
 - understand set up of `swapfile` (doesn't seem to work on docker), plus other steps from `marvel-nccr.simulationbase`
-- report on `du -sh /root` (5Gb) and `du -sh /root/.conda/envs/*`
+- Get <https://github.com/quanshengwu/wannier_tools> on Conda, to replace `marvel-nccr.wannier_tools`
 
 - run code tests (how to check success <https://github.com/aiidateam/aiida-common-workflows/issues/289>?):
   - `aiida-common-workflows launch relax abinit -S Si -X abinit.main -n 2`  ✅

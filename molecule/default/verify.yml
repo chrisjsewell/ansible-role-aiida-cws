@@ -10,23 +10,32 @@
   - name: Initialise dynamic variables for the role
     import_tasks: ../../tasks/initialise_vars.yml
 
+  - name: Collect home disk usage
+    ansible.builtin.shell: "du -ch -t 100000000 {{ current_user_home }} | sort -rh"
+    changed_when: false
+    register: home_disk_usage
+
+  - name: Print the home disk usage, for debugging
+    ansible.builtin.debug:
+      msg: "{{ home_disk_usage.stdout }}"
+
   - name: Read the final release notes
     ansible.builtin.slurp:
-      src: "{{ release_notes }}"
-    register: release_notes_slurp
+      src: "{{ aiida_release_notes }}"
+    register: aiida_release_notes_slurp
 
   - name: Print the final release notes, for debugging
     ansible.builtin.debug:
-      msg: "{{ release_notes_slurp.content | b64decode }}"
+      msg: "{{ aiida_release_notes_slurp.content | b64decode }}"
 
   - name: run pip check in aiida environment
-    command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} pip check --no-color"
+    command: "{{ conda_exec_user }} run -n {{ aiida_conda_env }} pip check --no-color"
     changed_when: false
 
   - name: check aiida profile status
-    command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} verdi status"
+    command: "{{ conda_exec_user }} run -n {{ aiida_conda_env }} verdi status"
     changed_when: false
 
   - name: check aiida daemon status
-    command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} verdi daemon status"
+    command: "{{ conda_exec_user }} run -n {{ aiida_conda_env }} verdi daemon status"
     changed_when: false

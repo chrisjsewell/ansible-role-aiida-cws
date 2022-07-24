@@ -1,7 +1,7 @@
 # Create an aiida code for a given plugin entry point
 
 - name: "Check if '{{ aiida_plugin.label }}' Code is already present"
-  shell: "{{ aiida_run_verdi }} code show {{ aiida_plugin.label }}@{{ conda_aiida_code_computer }}"
+  shell: "{{ aiida_run_verdi }} code show {{ aiida_plugin.label }}@{{ aiida_conda_code_computer }}"
   ignore_errors: true
   no_log: true
   changed_when: false
@@ -26,7 +26,7 @@
       _aiida_code_description: "{{ aiida_plugin.plugin }} plugin, using the conda env={{ aiida_code.conda_env }}"
       _aiida_code_plugin: "{{ aiida_plugin.plugin }}"
       _aiida_code_executable: "{{ conda_folder_user }}/envs/{{ aiida_code.conda_env }}/bin/{{ aiida_plugin.exec }}"
-      _aiida_computer_label: "{{ conda_aiida_code_computer }}"
+      _aiida_computer_label: "{{ aiida_conda_code_computer }}"
 
   - name: "Setup {{ aiida_plugin.label }} code for AiiDA"
     shell: |

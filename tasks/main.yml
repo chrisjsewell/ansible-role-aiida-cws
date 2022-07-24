@@ -34,7 +34,7 @@
 
 - name: Create aiida codes for the available plugins
   include_tasks: aiida-code.yml
-  loop: "{{ conda_aiida_code_plugins }}"
+  loop: "{{ aiida_conda_code_plugins }}"
   loop_control:
     loop_var: aiida_code
     label: "{{ aiida_code.plugin_package }}"
@@ -60,7 +60,7 @@
 
 - name: Add system package installs to the release notes
   ini_file:
-    path: "{{ release_notes }}"
+    path: "{{ aiida_release_notes }}"
     section: "System packages"
     option: "{{ pkg }}"
     value: "{{ ansible_facts.packages[pkg][0].version }}"

@@ -1,4 +1,5 @@
-# initialise dynamic variables for the role
+# initialise dynamic variables for the role,
+# that require ${HOME} be replaced with the current user's home directory
 
 - name: Store current user
   when: current_user is undefined
@@ -38,4 +39,4 @@
 
 - name: Set user conda_run_verdi
   set_fact:
-    aiida_run_verdi: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} verdi"
+    aiida_run_verdi: "{{ conda_exec_user }} run -n {{ aiida_conda_env }} verdi"

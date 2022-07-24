@@ -11,19 +11,23 @@
   when: aiida_check_computer.rc != 0
   block:
 
+  - name: Merge computer variables with defaults
+    set_fact:
+      aiida_computer_full: "{{ aiida_computer_defaults | combine(aiida_computer) }}"
+
   - name: "Copy the configuration for the {{ aiida_computer.label }} AiiDA computer"
     template:
       src: "aiida-computer.yml"
       dest: "{{ aiida_data_folder_user }}/{{ aiida_computer.label }}.yml"
       mode: 0755
     vars:
-      _aiida_computer_work_dir: "{{ aiida_computer.run_folder |  regex_replace('\\$\\{HOME}', current_user_home) }}"
-      _aiida_computer_label: "{{ aiida_computer.label }}"
-      _aiida_computer_hostname: "{{ aiida_computer.hostname }}"
-      _aiida_computer_transport: "{{ aiida_computer.transport }}"
-      _aiida_computer_scheduler: "{{ aiida_computer.scheduler }}"
-      _aiida_computer_mpirun: "{{ aiida_computer.mpi_cmd }}"
-      _aiida_computer_default_mpiprocs: "{{ aiida_computer.default_mpiprocs }}"
+      _aiida_computer_work_dir: "{{ aiida_computer_full.run_folder |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+      _aiida_computer_label: "{{ aiida_computer_full.label }}"
+      _aiida_computer_hostname: "{{ aiida_computer_full.hostname }}"
+      _aiida_computer_transport: "{{ aiida_computer_full.transport }}"
+      _aiida_computer_scheduler: "{{ aiida_computer_full.scheduler }}"
+      _aiida_computer_mpirun: "{{ aiida_computer_full.mpi_cmd }}"
+      _aiida_computer_default_mpiprocs: "{{ aiida_computer_full.default_mpiprocs }}"
 
   - name: "Setup {{ aiida_computer.label }} computer for AiiDA"
     shell: |
@@ -31,4 +35,4 @@
         --non-interactive --config "{{ aiida_data_folder_user }}/{{ aiida_computer.label }}.yml"
 
   - name: "Configure {{ aiida_computer.label }}"
-    shell: "{{ aiida_run_verdi }} computer configure {{ aiida_computer.transport }} {{ aiida_computer.label }} --non-interactive {{ aiida_computer.configure }}"
+    shell: "{{ aiida_run_verdi }} computer configure {{ aiida_computer_full.transport }} {{ aiida_computer.label }} --non-interactive {{ aiida_computer_full.configure }}"

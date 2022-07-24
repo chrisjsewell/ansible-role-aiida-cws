@@ -12,7 +12,7 @@
 
   - name: "download: {{ conda_installer_url }}"
     become: true
-    become_user: "{{ root_user }}"
+    become_user: "{{ aiida_root_user }}"
     ansible.builtin.get_url:
       url: "{{ conda_installer_url }}"
       dest: "{{ conda_installer_sh }}"
@@ -32,7 +32,7 @@
   always:
   - name: deleting conda installer...
     become: true
-    become_user: "{{ root_user }}"
+    become_user: "{{ aiida_root_user }}"
     ansible.builtin.file:
       path: "{{ conda_installer_sh }}"
       state: absent

@@ -16,7 +16,7 @@
 
 - name: Write the {{ aiida_code.conda_env }} executables to the release notes
   ini_file:
-    path: "{{ release_notes }}"
+    path: "{{ aiida_release_notes }}"
     section: "Code environment: {{ aiida_code.conda_env }}"
     option: "executables"
     value: "{{ aiida_code.codes | map(attribute='exec') | join(', ') }}"
@@ -31,7 +31,7 @@
 
 - name: Write {{ aiida_code.conda_env }} env packages to release notes
   ini_file:
-    path: "{{ release_notes }}"
+    path: "{{ aiida_release_notes }}"
     section: "Code environment: {{ aiida_code.conda_env }}"
     option: "{{ pkg.name }}"
     value: "{{ pkg.version }}-{{ pkg.build_string }}@{{ pkg.channel }}"

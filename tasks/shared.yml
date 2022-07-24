@@ -2,7 +2,7 @@
 
 - name: Install shared apt packages
   become: true
-  become_user: "{{ root_user }}"
+  become_user: "{{ aiida_root_user }}"
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
@@ -12,6 +12,12 @@
   ansible.builtin.file:
     path: "{{ aiida_temp_folder }}"
     state: directory
+
+- name: set timezone to {{ aiida_timezone_name }}
+  become: true
+  timezone:
+    name: "{{ aiida_timezone_name }}"
+  when: aiida_timezone_name is defined
 
 - name: Set user environmental variables
   # OMP_NUM_THREADS: https://github.com/marvel-nccr/quantum-mobile/issues/187
@@ -32,9 +38,9 @@
 - name: Fix for running aiida processes on root
   # get `mesg: ttyname failed: Inappropriate ioctl for device` when running aiida processes on root
   # see: https://superuser.com/a/1277604
-  when: current_user == root_user
+  when: current_user == aiida_root_user
   become: true
-  become_user: "{{ root_user }}"
+  become_user: "{{ aiida_root_user }}"
   ansible.builtin.replace:
     path: "${HOME}/.profile"
     regexp: "^mesg n"
@@ -44,9 +50,9 @@
   # see: https://github.com/open-mpi/ompi/pull/5597/files
   # note: could use `--allow-run-on-root` in the mpirun command, but this is not supported by mpich
   # important running as root should only be done in a container
-  when: current_user == root_user
+  when: current_user == aiida_root_user
   become: true
-  become_user: "{{ root_user }}"
+  become_user: "{{ aiida_root_user }}"
   ansible.builtin.blockinfile:
     path: "${HOME}/.bashrc"
     marker: "# {mark} ANSIBLE MANAGED BLOCK (aiida_cws/root)"

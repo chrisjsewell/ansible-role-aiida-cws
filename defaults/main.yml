@@ -1,8 +1,9 @@
 # in this file add variables to be used in the tasks
 
 # general
-root_user: root
-release_notes: "${HOME}/release_notes.ini"
+aiida_root_user: root
+aiida_release_notes: "${HOME}/aiida_release_notes.ini"
+# aiida_timezone_name: Europe/Zurich
 aiida_temp_folder: /tmp
 aiida_data_folder_temp: "${HOME}/.local/share/aiida"
 aiida_apt_packages:
@@ -13,7 +14,6 @@ aiida_apt_packages:
 
 # postgresql install
 aiida_postgres_user: postgres
-
 # postgresql database
 aiida_postgres_host: localhost
 aiida_postgres_port: 5432
@@ -29,7 +29,6 @@ conda_installer_url: https://github.com/conda-forge/miniforge/releases/download/
 conda_installer_checksum: sha256:8cb16ef82fe18d466850abb873c7966090b0fbdcf1e80842038e0b4e6d8f0b66
 conda_installer_timeout: 300  # seconds
 conda_base_packages: []
-
 # additional envs to create
 conda_add_envs: []
 # this env could replace the tools installed in simulationbase,
@@ -42,11 +41,11 @@ conda_add_envs: []
 #   - cif2cell
 
 # aiida conda env
-conda_aiida_env: "aiida"
-conda_aiida_python_version: "3.8"
-conda_aiida_core_version: "1.6"
-conda_aiida_core_version_major: "{{ (conda_aiida_core_version|string).split('.')[0] }}"
-conda_aiida_add_packages:
+aiida_conda_env: "aiida"
+aiida_conda_python_version: "3.8"
+aiida_conda_core_version: "1.6"
+aiida_conda_core_version_major: "{{ (aiida_conda_core_version|string).split('.')[0] }}"
+aiida_conda_add_packages:
 - ipykernel
 - jupyterlab=3
 - jupyterlab-lsp
@@ -71,7 +70,7 @@ conda_aiida_add_packages:
 
 # these are requirements which are not yet on conda
 # we use --no-deps though, so that we don't clobber any conda packages
-conda_aiida_pip_packages:
+aiida_conda_pip_packages:
 - git+https://github.com/aiidateam/aiida-common-workflows.git@db0f1ae125e045183f69cd42d09f58fd69c2bff8
 
 # aiida profile
@@ -80,26 +79,28 @@ aiida_profile_first_name: Max
 aiida_profile_last_name: Scientist
 aiida_profile_institution: Quantum Mobile
 aiida_profile_email: aiida@localhost
-aiida_database_backend: "{{ 'django' if conda_aiida_core_version_major|int < 2 else 'psql_dos' }}"
+aiida_database_backend: "{{ 'django' if aiida_conda_core_version_major|int < 2 else 'psql_dos' }}"
 
 # aiida computers
+aiida_computer_defaults:
+  hostname: localhost
+  run_folder: "${HOME}/.aiida_run"
+  mpi_cmd: "mpirun -np {tot_num_mpiprocs}"
+  default_mpiprocs: 2
+  configure: "--safe-interval 0"
 aiida_computers:
 - label: local_direct
-  hostname: localhost
-  scheduler: "{{ 'direct' if  conda_aiida_core_version_major|int < 2 else 'core.direct' }}"
-  transport: "{{ 'local' if  conda_aiida_core_version_major|int < 2 else 'core.local' }}"
-  run_folder: "${HOME}/.aiida_run"
-  mpi_cmd: "mpirun -np {tot_num_mpiprocs}"
-  default_mpiprocs: 2
-  configure: "--safe-interval 0"
+  scheduler: "{{ 'direct' if aiida_conda_core_version_major|int < 2 else 'core.direct' }}"
+  transport: "{{ 'local' if aiida_conda_core_version_major|int < 2 else 'core.local' }}"
 - label: local_direct_conda
-  hostname: localhost
   scheduler: conda.direct
-  transport: "{{ 'local' if  conda_aiida_core_version_major|int < 2 else 'core.local' }}"
-  run_folder: "${HOME}/.aiida_run"
-  mpi_cmd: "mpirun -np {tot_num_mpiprocs}"
-  default_mpiprocs: 2
-  configure: "--safe-interval 0"
+  transport: "{{ 'local' if aiida_conda_core_version_major|int < 2 else 'core.local' }}"
+- label: local_slurm
+  scheduler: "{{ 'slurm' if aiida_conda_core_version_major|int < 2 else 'core.slurm' }}"
+  transport: "{{ 'local' if aiida_conda_core_version_major|int < 2 else 'core.local' }}"
+- label: local_slurm_conda
+  scheduler: conda.slurm
+  transport: "{{ 'local' if aiida_conda_core_version_major|int < 2 else 'core.local' }}"
 
 aiida_pseudos_sssp:
 - version: "1.1"
@@ -125,8 +126,8 @@ aiida_pseudos_dojo:
 
 # aiida code plugins
 # these are plugins and their codes, which are both available on conda-forge
-conda_aiida_code_computer: local_direct_conda  # the computer use, by label
-conda_aiida_code_plugins:
+aiida_conda_code_computer: local_direct_conda  # the computer to use, by label
+aiida_conda_code_plugins:
 
 - plugin_package: aiida-abinit
   plugin_version: "0.2.0a1"
