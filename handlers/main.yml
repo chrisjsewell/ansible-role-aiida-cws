@@ -1,2 +1,3 @@
 - name: conda clean
-  command: "{{ conda_exec_user }} clean --yes --all"
+  # for a discussion on using -f, see: https://github.com/jupyter/docker-stacks/issues/861
+  command: "{{ conda_exec_user }} clean --yes --all -f"
