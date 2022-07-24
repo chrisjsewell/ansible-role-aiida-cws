@@ -1,0 +1,41 @@
+# initialise dynamic variables for the role
+
+- name: Store current user
+  when: current_user is undefined
+  ansible.builtin.command: "whoami"
+  changed_when: false
+  check_mode: false
+  register: current_user_cmd
+
+- name: Set current user
+  when: current_user is undefined
+  set_fact:
+    current_user: "{{ current_user_cmd.stdout }}"
+
+- name: store current user $HOME
+  when: current_user_home is undefined
+  ansible.builtin.command: "echo $HOME"
+  changed_when: false
+  check_mode: false
+  register: current_user_home_cmd
+
+- name: Set current user home
+  when: current_user_home is undefined
+  set_fact:
+    current_user_home: "{{ current_user_home_cmd.stdout }}"
+
+- name: Set user aiida_data_folder
+  set_fact:
+    aiida_data_folder_user: "{{ aiida_data_folder_temp |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+
+- name: Set user conda_folder
+  set_fact:
+    conda_folder_user: "{{ conda_folder_temp |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+
+- name: Set user conda_exec
+  set_fact:
+    conda_exec_user: "{{ conda_exec_temp |  regex_replace('\\$\\{HOME}', current_user_home) }}"
+
+- name: Set user conda_run_verdi
+  set_fact:
+    aiida_run_verdi: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} verdi"

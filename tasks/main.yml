@@ -1,8 +1,12 @@
 # The main task file
 
-- name: Initialise the role
-  import_tasks: initialise.yml
+- name: Initialise dynamic variables for the role
+  import_tasks: initialise_vars.yml
   tags: [aiida_cws, always]
+
+- name: Run shared tasks
+  import_tasks: shared.yml
+  tags: [aiida_cws, aiida_cws_shared]
 
 - name: Install PostGreSQL and start service
   import_tasks: postgresql.yml

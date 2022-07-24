@@ -57,20 +57,11 @@
   notify:
   - conda clean
 
-- name: Set `workon` alias to `conda activate`
-  ansible.builtin.lineinfile:
+- name: Create aliases for conda commands
+  ansible.builtin.blockinfile:
     path: "${HOME}/.bashrc"
-    regexp: "^alias workon=.*"
-    line: 'alias workon="conda activate"'
-
-- name: Set `runon` alias to `conda run --live-stream -n`
-  ansible.builtin.lineinfile:
-    path: "${HOME}/.bashrc"
-    regexp: "^alias runon=.*"
-    line: 'alias runon="conda run --live-stream -n"'
-
-- name: Set `listenvs` alias to `conda info --envs`
-  ansible.builtin.lineinfile:
-    path: "${HOME}/.bashrc"
-    regexp: "^alias listenvs=.*"
-    line: 'alias listenvs="conda info --envs"'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK (aiida_cws/conda_alias)"
+    block: |
+      alias workon="conda activate"
+      alias runon="conda run --live-stream -n"
+      alias listenvs="conda info --envs"
