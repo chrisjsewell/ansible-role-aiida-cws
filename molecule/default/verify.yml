@@ -1,0 +1,32 @@
+- name: Verify
+  hosts: all
+  become: true
+
+  tasks:
+
+  - name: Initialise the default variables for the role
+    include_vars: ../../defaults/main.yml
+
+  - name: Initialise dynamic variables for the role
+    import_tasks: ../../tasks/initialise_vars.yml
+
+  - name: Read the final release notes
+    ansible.builtin.slurp:
+      src: "{{ release_notes }}"
+    register: release_notes_slurp
+
+  - name: Print the final release notes, for debugging
+    ansible.builtin.debug:
+      msg: "{{ release_notes_slurp.content | b64decode }}"
+
+  - name: run pip check in aiida environment
+    command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} pip check --no-color"
+    changed_when: false
+
+  - name: check aiida profile status
+    command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} verdi status"
+    changed_when: false
+
+  - name: check aiida daemon status
+    command: "{{ conda_exec_user }} run -n {{ conda_aiida_env }} verdi daemon status"
+    changed_when: false
