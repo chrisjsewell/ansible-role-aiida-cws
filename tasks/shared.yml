@@ -1,23 +1,19 @@
 # initialise the simulation environment
 
-- name: ensure that {{ aiida_temp_folder }} directory exists
-  ansible.builtin.file:
-    path: "{{ aiida_temp_folder }}"
-    state: directory
-
 - name: Install shared apt packages
   become: true
   become_user: "{{ root_user }}"
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
-    name:
-    - vim  # required for manual verdi code/computer setup
-    - ssh  # required by MPI
-    - git  # useful for cloning repositories
-    - python3-pkg-resources  # required by the pip ansible module
+    name: "{{ aiida_apt_packages }}"
 
-- name: Set environmental variables
+- name: ensure that {{ aiida_temp_folder }} directory exists
+  ansible.builtin.file:
+    path: "{{ aiida_temp_folder }}"
+    state: directory
+
+- name: Set user environmental variables
   # OMP_NUM_THREADS: https://github.com/marvel-nccr/quantum-mobile/issues/187
   # MAMBA_NO_BANNER: https://github.com/mamba-org/mamba/issues/587#issuecomment-762998474
   # set stack size to unlimited

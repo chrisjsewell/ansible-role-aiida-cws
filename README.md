@@ -1,6 +1,6 @@
 [![CI](https://github.com/marvel-nccr/ansible-role-aiida-cws/workflows/CI/badge.svg)](https://github.com/marvel-nccr/ansible-role-aiida-cws/actions)
-[![Ansible Role](https://img.shields.io/ansible/role/25521.svg)](https://galaxy.ansible.com/marvel-nccr/aiida-cws)
 [![Release](https://img.shields.io/github/tag/marvel-nccr/ansible-role-aiida-cws.svg)](https://github.com/marvel-nccr/ansible-role-aiida-cws/releases)
+<!-- [![Ansible Role](https://img.shields.io/ansible/role/25521.svg)](https://galaxy.ansible.com/marvel-nccr/aiida-cws) -->
 
 # Ansible Role: marvel-nccr.aiida-cws
 
@@ -9,20 +9,22 @@ An Ansible role that installs and configures an environment for running the [Aii
 The primary goal is to create an environment that a user can enter and, without any other steps, run commands like:
 
 ```shell
-aiida-common-workflows launch relax siesta --structure=Si -X siesta -n 2
+aiida-common-workflows launch relax quantum_espresso -S Si -X qe.pw -n 2
 ```
 
-For all the available (open-source) simulation codes: `abinit`, `cp2k`, `fleur`, `nwchem`, `qe`, `siesta`, `wannier90`, `yambo`.
+For all the available (open-source) simulation codes: `abinit`, `bigdft` (to come), `cp2k`, `fleur`, `nwchem`, `qe`, `siesta`, `wannier90`, `yambo`.
 
 The key components are:
 
-- PostgreSQL installed system wide, with auto-start service.
-- RabbitMQ installed system wide, with auto-start service.
-- Conda installed system wide, with activation on terminals
-- The AiiDA python environment installed into the `aiida` Conda environment, including the `aiida-common-workflows` package, dependent plugins, and `jupyterlab`, then a profile is created.
+- **PostgreSQL** is installed system wide, with auto-start service.
+- **RabbitMQ** is installed system wide, with auto-start service.
+- **Conda** installed system wide (as [miniforge](https://github.com/conda-forge/miniforge)), with activation on terminals
+- The **AiiDA** python environment installed into the `aiida` Conda environment, including the `aiida-common-workflows` package, dependent plugins, and `jupyterlab`, then a profile is created.
 - Each simulation code, and their dependencies, are installed into their own Conda environment.
   - Then an AiiDA `Code` is created for each code executable
-- The `aiida-pseudo` package is used to install the requisite pseudo potentials.
+- The `aiida-pseudo` package is used to install the requisite pseudo-potentials.
+
+The of the conda package and environment manager allows for fast installation of pre-compiled simulation codes, which are isolated from each other - ensuring correct use of dependency versions and environmental variables etc - but with sharing of common dependencies across environments (by use of hard-links), ensuring optimum memory usage.
 
 ## Installation
 
@@ -39,6 +41,93 @@ See `defaults/main.yml`
   roles:
   - role: marvel-nccr.aiida-cws
 ```
+
+## Usage
+
+Once logged in to a terminal, the `base` environment of Conda is activated. To control the conda environments, you can use the `conda` command, or the `mamba` command is a drop-in replacement, for [faster installation of packages](https://wolfv.medium.com/the-future-of-mamba-fdf6d628b3df). FOr a brief introduction to Conda, see [the getting started tutorial](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html).
+
+The alias `listenvs` (for `conda env --info`) can be used to list the available environments:
+
+```shell
+(base) root@instance:/# listenvs 
+# conda environments:
+#
+base                  *  /root/.conda
+abinit                   /root/.conda/envs/abinit
+aiida                    /root/.conda/envs/aiida
+cp2k                     /root/.conda/envs/cp2k
+fleur                    /root/.conda/envs/fleur
+nwchem                   /root/.conda/envs/nwchem
+qe                       /root/.conda/envs/qe
+siesta                   /root/.conda/envs/siesta
+wannier90                /root/.conda/envs/wannier90
+yambo                    /root/.conda/envs/yambo
+```
+
+To enter an environment, use the alias `workon` (for `conda actiavate`):
+
+```shell
+(base) root@instance:/# workon aiida
+(aiida) root@instance:/#
+```
+
+You can see what is installed in that environment, using `conda list`:
+
+```shell
+(aiida) root@instance:/# conda list
+# packages in environment at /root/.conda/envs/aiida:
+#
+...
+aiida-core                1.6.8              pyh6c4a22f_2    conda-forge
+...
+python                    3.8.13          h582c2e5_0_cpython    conda-forge
+...
+```
+
+
+This exposes the installed executables, such as `verdi` (with tab-completion) and `aiida-common-workflows`:
+
+```shell
+(aiida) root@instance:/# verdi status
+ ✔ config dir:  /root/.aiida
+ ✔ profile:     On profile generic
+ ✔ repository:  /root/.aiida/repository/generic
+ ✔ postgres:    Connected as aiida@localhost:5432
+ ✔ rabbitmq:    Connected to RabbitMQ v3.6.10 as amqp://guest:guest@127.0.0.1:5672?heartbeat=600
+ ✔ daemon:      Daemon is running as PID 18513 since 2022-07-23 18:40:31
+```
+
+You'll note that the `general` profile should already be set up, with connections to running PostgreSQL, RabbitMQ and AiiDA daemon systems services:
+
+```shell
+(aiida) root@instance:/# systemctl --type=service | grep -E '(rabbitmq|postgres|aiida)'
+aiida-daemon@generic.service  loaded active running AiiDA daemon service for profile generic
+postgresql@10-main.service    loaded active running PostgreSQL Cluster 10-main
+rabbitmq-server.service       loaded active running RabbitMQ Messaging Server
+```
+
+AiiDA codes are set up to run simulation code executables:
+
+```shell
+(aiida) root@instance:/# verdi code list
+# List of configured codes:
+# (use 'verdi code show CODEID' to see the details)
+* pk 1 - abinit.main@local_direct_conda
+* pk 2 - cp2k.main@local_direct_conda
+* pk 3 - fleur.main@local_direct_conda
+* pk 4 - fleur.inpgen@local_direct_conda
+* pk 5 - nwchem.main@local_direct_conda
+* pk 6 - qe.cp@local_direct_conda
+* pk 7 - qe.neb@local_direct_conda
+* pk 8 - qe.ph@local_direct_conda
+* pk 9 - qe.pp@local_direct_conda
+* pk 10 - qe.pw@local_direct_conda
+* pk 11 - siesta.main@local_direct_conda
+* pk 12 - wannier90.main@local_direct_conda
+* pk 13 - yambo.main@local_direct_conda
+```
+
+These are set up use `conda run -n env_name /path/to/executable` to run the executable within the correct environment.
 
 ## Development and testing
 
@@ -67,7 +156,7 @@ pip install tox
 tox
 ```
 
-## Code style
+### Code style
 
 Code style is formatted and linted with [pre-commit](https://pre-commit.com/).
 
@@ -76,7 +165,7 @@ pip install pre-commit
 pre-commit run -all
 ```
 
-## Deployment
+### Deployment
 
 Deployment to Ansible Galaxy is automated *via* GitHub Actions.
 Simply tag a release `vX.Y.Z` to initiate the CI and release workflow.
@@ -97,7 +186,8 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 - jupyter lab launcher
 - rest api service
 - check everything still works with non-root user install
-- report on `du -sh /root` (8Gb) and `du -sh /root/.conda/envs/*`
+- understand set up of `swapfile` (doesn't seem to work on docker), plus other steps from `marvel-nccr.simulationbase`
+- report on `du -sh /root` (5Gb) and `du -sh /root/.conda/envs/*`
 
 - run pip check at end, on aiida environment (but would currently fail)
 - run code tests (how to check success?):
@@ -125,5 +215,3 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
   - check on use of `OMP_NUM_THREADS=1` (and other env vars)
   - get all to insure they are using latest pymatgen (2022), see <https://pymatgen.org/compatibility.html>
   - update to aiida-core v2
-
-<https://wolfv.medium.com/the-future-of-mamba-fdf6d628b3df>

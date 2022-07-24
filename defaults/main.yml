@@ -5,6 +5,11 @@ root_user: root
 release_notes: "${HOME}/release_notes.ini"
 aiida_temp_folder: /tmp
 aiida_data_folder_temp: "${HOME}/.local/share/aiida"
+aiida_apt_packages:
+- vim    # required for manual verdi code/computer setup
+- ssh    # required by MPI
+- git    # useful for cloning repositories
+- python3-pkg-resources    # required by the pip ansible module
 
 # postgresql install
 aiida_postgres_user: postgres
@@ -27,6 +32,9 @@ conda_base_packages: []
 
 # additional envs to create
 conda_add_envs: []
+# this env could replace the tools installed in simulationbase,
+# however, it adds >1Gb of disk space to the VM,
+# and misses xmgrace, xcrysden
 # - name: tools
 #   packages:
 #   - jmol
