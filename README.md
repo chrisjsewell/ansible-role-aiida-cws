@@ -44,6 +44,8 @@ See `defaults/main.yml`
 
 ## Usage
 
+### Environment management
+
 Once logged in to a terminal, the `base` environment of Conda is activated. To control the conda environments, you can use the `conda` command, or the `mamba` command is a drop-in replacement, for [faster installation of packages](https://wolfv.medium.com/the-future-of-mamba-fdf6d628b3df). FOr a brief introduction to Conda, see [the getting started tutorial](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html).
 
 The alias `listenvs` (for `conda env --info`) can be used to list the available environments:
@@ -84,6 +86,7 @@ python                    3.8.13          h582c2e5_0_cpython    conda-forge
 ...
 ```
 
+### Running AiiDA
 
 This exposes the installed executables, such as `verdi` (with tab-completion) and `aiida-common-workflows`:
 
@@ -128,6 +131,26 @@ AiiDA codes are set up to run simulation code executables:
 ```
 
 These are set up use `conda run -n env_name /path/to/executable` to run the executable within the correct environment.
+
+### Launching Jupyter Lab
+
+Inside the `aiida` environment, you can launch Jupyter Lab with the `jupyter lab` command:
+
+```shell
+(aiida) root@instance:/# jupyter lab
+```
+
+If using the Docker container, you should add the following options:
+
+```shell
+(aiida) root@instance:/# jupyter lab  --allow-root --ip=0.0.0.0
+```
+
+You can manage what jupyter servers are running with:
+
+```shell
+(aiida) root@instance:/# jupyter server list
+```
 
 ## Development and testing
 
@@ -181,6 +204,7 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 
 ## TODO
 
+- Add "User Guide" inside the build (in desktop folder)
 - move to building docker with [tini](https://github.com/krallin/tini) as PID 1
   - What system service manager to use in place of systemd? (<https://github.com/krallin/tini/issues/175>)
 - jupyter lab launcher
@@ -189,8 +213,7 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 - understand set up of `swapfile` (doesn't seem to work on docker), plus other steps from `marvel-nccr.simulationbase`
 - report on `du -sh /root` (5Gb) and `du -sh /root/.conda/envs/*`
 
-- run pip check at end, on aiida environment (but would currently fail)
-- run code tests (how to check success?):
+- run code tests (how to check success <https://github.com/aiidateam/aiida-common-workflows/issues/289>?):
   - `aiida-common-workflows launch relax abinit -S Si -X abinit.main -n 2`  ✅
     - although issues with `abipy` and `The netcdf library does not support parallel IO` and `nkpt*nsppol (29) is not a multiple of nproc_spkpt (2)`
   - `aiida-common-workflows launch relax cp2k -S Si -X cp2k.main -n 1` ✅
