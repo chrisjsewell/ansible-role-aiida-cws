@@ -1,0 +1,32 @@
+# When the computer doesn't have enough RAM to hold everything it needs,
+# it can move some it doesn't need immediately to the hard drive.
+# It's incredibly slow, but it's usually considered better than the computer crashing.
+# This is required by many simulation codes.
+# see: https://www.techtarget.com/searchwindowsserver/definition/swap-file-swap-space-or-pagefile
+# note this can not be added in a container, since there the underlying OS handles memory
+
+- name: "Check if swapfile exists"
+  stat: path=/swapfile
+  register: swapfile_stat
+
+- block:
+
+  - name: "Create swapfile"
+    become: true
+    command: "dd if=/dev/zero of=/swapfile bs=1M count=1024"
+
+  - name: "Make the swapfile a valid swap"
+    become: true
+    command: "mkswap /swapfile"
+
+  - name: "Use the swapfile"
+    become: true
+    command: "swapon /swapfile"
+
+  - name: "Put a line in fstab to ensure swap is used at boot time"
+    become: true
+    lineinfile:
+      path: "/etc/fstab"
+      line: "/swapfile swap swap defaults 0 0"
+
+  when: not swapfile_stat.stat.exists

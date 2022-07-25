@@ -19,6 +19,10 @@
     name: "{{ aiida_timezone_name }}"
   when: aiida_timezone_name is defined
 
+- name: Setup swapfile RAM "overspill"
+  include_tasks: create_swapfile.yml
+  when: aiida_create_swapfile
+
 - name: Set user environmental variables
   # OMP_NUM_THREADS: https://github.com/marvel-nccr/quantum-mobile/issues/187
   # MAMBA_NO_BANNER: https://github.com/mamba-org/mamba/issues/587#issuecomment-762998474

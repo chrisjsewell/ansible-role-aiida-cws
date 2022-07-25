@@ -42,6 +42,7 @@ See `defaults/main.yml`
   - role: marvel-nccr.aiida-cws
     vars:
       aiida_timezone_name: Europe/Zurich  # to set a certain timezone for AiiDA
+      aiida_create_swapfile: true  # create a swapfile for RAM overflow, non-containers only
       aiida_allow_mpi_on_root: true  # containers only
 ```
 
@@ -54,7 +55,7 @@ If you want to install SLURM and use it as the scheduler, you can use e.g.:
   - role: marvel-nccr.aiida-cws
     vars:
       aiida_timezone_name: Europe/Zurich
-      aiida_allow_mpi_on_root: true
+      aiida_create_swapfile: true
       aiida_conda_code_computer: local_slurm_conda
 ```
 
@@ -226,7 +227,7 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 - jupyter lab launcher
 - rest api service
 - check everything still works with non-root user install
-- understand set up of `swapfile` (doesn't seem to work on docker), plus other steps from `marvel-nccr.simulationbase`
+- migrate tasks from `marvel-nccr.simulationbase` (understand `hostname.yml`, which is non-container only, and `clean.yml`)
 - Get <https://github.com/quanshengwu/wannier_tools> on Conda, to replace `marvel-nccr.wannier_tools`
 
 - run code tests (how to check success <https://github.com/aiidateam/aiida-common-workflows/issues/289>?):
