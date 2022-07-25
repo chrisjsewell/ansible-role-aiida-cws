@@ -2,6 +2,7 @@ allow_duplicates: false
 
 galaxy_info:
   role_name: aiida-cws
+  github_branch: main
   author: "MARVEL NCCR"
   # yamllint disable-line rule:line-length
   description: "An Ansible role that installs and configures an environment for running the AiiDA common-workflows"
