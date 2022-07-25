@@ -24,6 +24,10 @@
   import_tasks: aiida-env.yml
   tags: [aiida_cws, aiida_cws_env]
 
+- name: Create and start the aiida daemon service
+  import_tasks: aiida-daemon.yml
+  tags: [aiida_cws, aiida_cws_daemon]
+
 - name: Create aiida computers
   include_tasks: aiida-computer.yml
   loop: "{{ aiida_computers }}"
@@ -48,10 +52,6 @@
 - name: Jupyter lab releated set up
   import_tasks: jupyterlab.yml
   tags: [aiida_cws, aiida_cws_pps]
-
-- name: Create and start the aiida daemon service
-  import_tasks: aiida-daemon.yml
-  tags: [aiida_cws, aiida_cws_daemon]
 
 # finalise
 
