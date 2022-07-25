@@ -41,7 +41,8 @@ See `defaults/main.yml`
   roles:
   - role: marvel-nccr.aiida-cws
     vars:
-      aiida_timezone_name: Europe/Zurich
+      aiida_timezone_name: Europe/Zurich  # to set a certain timezone for AiiDA
+      aiida_allow_mpi_on_root: true  # containers only
 ```
 
 If you want to install SLURM and use it as the scheduler, you can use e.g.:
@@ -53,6 +54,7 @@ If you want to install SLURM and use it as the scheduler, you can use e.g.:
   - role: marvel-nccr.aiida-cws
     vars:
       aiida_timezone_name: Europe/Zurich
+      aiida_allow_mpi_on_root: true
       aiida_conda_code_computer: local_slurm_conda
 ```
 

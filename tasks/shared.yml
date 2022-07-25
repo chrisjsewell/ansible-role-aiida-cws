@@ -50,7 +50,7 @@
   # see: https://github.com/open-mpi/ompi/pull/5597/files
   # note: could use `--allow-run-on-root` in the mpirun command, but this is not supported by mpich
   # important running as root should only be done in a container
-  when: current_user == aiida_root_user
+  when: current_user == aiida_root_user and aiida_allow_mpi_on_root
   become: true
   become_user: "{{ aiida_root_user }}"
   ansible.builtin.blockinfile:
