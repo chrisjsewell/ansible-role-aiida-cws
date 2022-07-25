@@ -6,29 +6,35 @@ def aiida_conda_packages(python_version, core_version, code_plugins, add_package
 
     :param python_version: The python version to use.
     :param core_version: The aiida-core version to use.
-    :param code_plugins: A list of code plugin dictionaries,
-        each should contain 'plugin_package' and 'plugin_version'.
+    :param code_plugins: A dict of code plugin dictionaries, each should contain 'aiida_packages'.
     :param add_packages: A list of additional packages to install.
     """
+    _var_name = "aiida_conda_code_plugins"
     output = [
         "python={}".format(python_version),
         "aiida-core={}".format(core_version),
     ]
-    if not isinstance(code_plugins, list):
+    if not isinstance(code_plugins, dict):
         raise AnsibleFilterError(
-            "aiida_code_plugins_list requires a list, got %s" % type(code_plugins)
+            "%s requires a dict, got %s" % (_var_name, type(code_plugins))
         )
-    for plugin in code_plugins:
+    for name, plugin in code_plugins.items():
         if not isinstance(plugin, dict):
             raise AnsibleFilterError(
-                "aiida_code_plugins_list requires a list of dicts, got item %s" % plugin
+                "%s requires a dict of dicts, got item %s: %s"
+                % (_var_name, name, plugin)
             )
-        if not ("plugin_package" in plugin and "plugin_version" in plugin):
+        if not ("aiida_packages" in plugin):
             raise AnsibleFilterError(
-                "aiida_code_plugins_list requires items containing 'plugin_package' and 'plugin_version', got item %s"
-                % plugin
+                "%s requires items containing 'aiida_packages', got item %s: %s"
+                % (_var_name, name, plugin)
             )
-        output.append("%s=%s" % (plugin["plugin_package"], plugin["plugin_version"]))
+        if not isinstance(plugin["aiida_packages"], list):
+            raise AnsibleFilterError(
+                "%s requires key aiida_packages to be a list, for %s got: %s"
+                % (_var_name, name, plugin["aiida_packages"])
+            )
+        output.extend(plugin["aiida_packages"])
     return output + add_packages
 
 

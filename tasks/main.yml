@@ -34,10 +34,11 @@
 
 - name: Create aiida codes for the available plugins
   include_tasks: aiida-code.yml
-  loop: "{{ aiida_conda_code_plugins }}"
+  loop: "{{ aiida_conda_code_plugins | dict2items }}"
   loop_control:
-    loop_var: aiida_code
-    label: "{{ aiida_code.plugin_package }}"
+    label: "{{ item.key }}"
+  vars:
+    aiida_code: "{{ item.value }}"
   tags: [aiida_cws, aiida_cws_code]
 
 - name: Download an install pseudo-potential families
