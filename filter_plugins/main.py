@@ -3,7 +3,7 @@ from ansible.errors import AnsibleFilterError
 
 def aiida_conda_packages(python_version, core_version, code_plugins, add_packages):
     """Create a list of packages to install in the `aiida` conda environment.
-    
+
     :param python_version: The python version to use.
     :param core_version: The aiida-core version to use.
     :param code_plugins: A list of code plugin dictionaries,

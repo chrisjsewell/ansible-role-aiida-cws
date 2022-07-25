@@ -12,7 +12,7 @@ DOCUMENTATION = """
 module: conda_list
 short_description: List Conda packages
 description: List Conda packages
-author: 
+author:
   - Chris Sewell
 notes:  Requires conda to already be installed.
 options:
@@ -29,7 +29,7 @@ options:
 
 EXAMPLES = """
 - name: install packages via Conda
-  conda_list: 
+  conda_list:
     env: base
     regex: ^python-
 """

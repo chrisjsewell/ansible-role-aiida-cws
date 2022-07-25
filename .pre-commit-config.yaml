@@ -2,6 +2,13 @@
 # See usage instructions at https://pre-commit.com
 repos:
 
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.3.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: check-yaml
+
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.4.0
   hooks:
@@ -17,3 +24,9 @@ repos:
   rev: v6.3.0
   hooks:
   - id: ansible-lint
+
+- repo: https://github.com/psf/black
+  rev: 22.6.0
+  hooks:
+  - id: black
+    files: "filter_plugins/.*py"

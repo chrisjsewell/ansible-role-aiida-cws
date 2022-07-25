@@ -13,7 +13,7 @@ DOCUMENTATION = """
 module: conda_install
 short_description: Install Conda packages
 description: Install Conda packages
-author: 
+author:
   - Chris Sewell
 notes:  Requires conda to already be installed.
 options:
@@ -36,7 +36,7 @@ options:
 
 EXAMPLES = """
 - name: install packages via Conda
-  conda_install: 
+  conda_install:
     packages:
     - git=2
     - numpy
