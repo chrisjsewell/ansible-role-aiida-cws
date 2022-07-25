@@ -2,7 +2,7 @@
 [![Release](https://img.shields.io/github/tag/marvel-nccr/ansible-role-aiida-cws.svg)](https://github.com/marvel-nccr/ansible-role-aiida-cws/releases)
 <!-- [![Ansible Role](https://img.shields.io/ansible/role/25521.svg)](https://galaxy.ansible.com/marvel-nccr/aiida-cws) -->
 
-# Ansible Role: marvel-nccr.aiida-cws
+# Ansible Role: marvel-nccr.aiida_cws
 
 An Ansible role that installs and configures an environment for running the [AiiDA common-workflows](https://github.com/aiidateam/aiida-common-workflows) on Linux Ubuntu (with a bash shell).
 
@@ -28,7 +28,7 @@ The of the conda package and environment manager allows for fast installation of
 
 ## Installation
 
-`ansible-galaxy install marvel-nccr.aiida-cws`
+`ansible-galaxy install marvel-nccr.aiida_cws`
 
 ## Role Variables
 
@@ -39,7 +39,7 @@ See `defaults/main.yml`
 ```yaml
 - hosts: servers
   roles:
-  - role: marvel-nccr.aiida-cws
+  - role: marvel-nccr.aiida_cws
     vars:
       aiida_timezone_name: Europe/Zurich  # to set a certain timezone for AiiDA
       aiida_create_swapfile: true  # create a swapfile for RAM overflow, non-containers only
@@ -52,7 +52,7 @@ If you want to install SLURM and use it as the scheduler, you can use e.g.:
 - hosts: servers
   roles:
   - role: marvel-nccr.slurm
-  - role: marvel-nccr.aiida-cws
+  - role: marvel-nccr.aiida_cws
     vars:
       aiida_timezone_name: Europe/Zurich
       aiida_create_swapfile: true
@@ -198,11 +198,11 @@ This role uses [Molecule](https://molecule.readthedocs.io/en/latest/#) and [Dock
 
 After installing [Docker](https://www.docker.com/):
 
-Clone the repository into a package named `marvel-nccr.aiida-cws` (the folder must be named the same as the Ansible Galaxy name)
+Clone the repository into a package named `marvel-nccr.aiida_cws` (the folder must be named the same as the Ansible Galaxy name)
 
 ```bash
-git clone https://github.com/marvel-nccr/ansible-role-aiida-cws marvel-nccr.aiida-cws
-cd marvel-nccr.aiida-cws
+git clone https://github.com/marvel-nccr/ansible-role-aiida-cws marvel-nccr.aiida_cws
+cd marvel-nccr.aiida_cws
 ```
 
 Then run:
@@ -255,6 +255,7 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 - Get <https://github.com/quanshengwu/wannier_tools> on Conda, to replace `marvel-nccr.wannier_tools`
 - allow for source install of aiida-core (as previous)
 - output "raw" pseudo-potential files to aiida_data_folder_user
+- running `apt: upgrade: true` does actually allow for timezone to be set
 
 - run code tests (how to check success <https://github.com/aiidateam/aiida-common-workflows/issues/289>?):
   - `aiida-common-workflows launch relax abinit -S Si -X abinit.main -n 2`  ✅

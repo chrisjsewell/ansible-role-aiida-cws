@@ -6,7 +6,7 @@ on:
     - 'v*'
 
 env:
-  galaxy-name: "marvel-nccr.aiida-cws"
+  galaxy-name: "marvel-nccr.aiida_cws"
 
 jobs:
 

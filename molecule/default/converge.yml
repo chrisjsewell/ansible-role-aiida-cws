@@ -6,4 +6,4 @@
     aiida_allow_mpi_on_root: true
 
   roles:
-  - role: "marvel-nccr.aiida-cws"
+  - role: "marvel-nccr.aiida_cws"
