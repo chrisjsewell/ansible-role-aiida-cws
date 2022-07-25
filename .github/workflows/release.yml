@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+env:
+  galaxy-name: "marvel-nccr.aiida-cws"
+
+jobs:
+
+  pre-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - uses: pre-commit/action@v2.0.0
+
+  release:
+    name: Publish to ansible-galaxy
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    needs: [pre-commit]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: robertdebock/galaxy-action@1.2.1
+      with:
+        galaxy_api_key: ${{ secrets.GALAXY_API_KEY }}

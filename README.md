@@ -253,6 +253,8 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 - migrate tasks from `marvel-nccr.simulationbase` (understand `hostname.yml`, which is non-container only, and `clean.yml`)
   - double-check when to use `apt: clean` and `apt: upgrade`, etc
 - Get <https://github.com/quanshengwu/wannier_tools> on Conda, to replace `marvel-nccr.wannier_tools`
+- allow for source install of aiida-core (as previous)
+- output "raw" pseudo-potential files to aiida_data_folder_user
 
 - run code tests (how to check success <https://github.com/aiidateam/aiida-common-workflows/issues/289>?):
   - `aiida-common-workflows launch relax abinit -S Si -X abinit.main -n 2`  ✅
