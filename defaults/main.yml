@@ -51,6 +51,8 @@ aiida_conda_core_version_major: "{{ (aiida_conda_core_version|string).split('.')
 aiida_conda_add_packages:
 - ipykernel
 - jupyterlab=3
+- jupyterlab-tour
+- mamba_gator
 - jupyterlab-lsp
 - jupyter-lsp-python
 - jupyterlab-spellchecker
