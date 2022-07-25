@@ -5,16 +5,18 @@
 # https://askubuntu.com/questions/3167/what-is-difference-between-the-options-autoclean-autoremove-and-clean
 # https://github.com/ansible/ansible/issues/38920#issuecomment-1016640378
 
-- name: apt clean
+- name: aiida apt clean
   become: true
+  become_user: "{{ aiida_root_user }}"
   listen:
-  - apt clean
+  - aiida apt clean
   apt:
     autoclean: true
 
-- name: apt autoremove
+- name: aiida apt autoremove
   become: true
+  become_user: "{{ aiida_root_user }}"
   listen:
-  - apt clean
+  - aiida apt clean
   apt:
     autoremove: true

@@ -9,7 +9,7 @@
     - postgresql-server-dev-all
     - postgresql-client
     - python3-psycopg2  # required for postgresql_db role
-  notify: apt clean
+  notify: aiida apt clean
 
 - when: ansible_service_mgr == "systemd"
   block:

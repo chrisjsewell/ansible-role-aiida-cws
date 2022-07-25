@@ -7,7 +7,7 @@
     update_cache: true
     cache_valid_time: 3600
     name: "{{ aiida_apt_packages }}"
-  notify: apt clean
+  notify: aiida apt clean
 
 - name: ensure that {{ aiida_temp_folder }} directory exists
   ansible.builtin.file:
@@ -16,6 +16,7 @@
 
 - name: set timezone to {{ aiida_timezone_name }}
   become: true
+  become_user: "{{ aiida_root_user }}"
   timezone:
     name: "{{ aiida_timezone_name }}"
   when: aiida_timezone_name is defined

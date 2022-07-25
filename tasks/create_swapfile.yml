@@ -13,18 +13,22 @@
 
   - name: "Create swapfile"
     become: true
+    become_user: "{{ aiida_root_user }}"
     command: "dd if=/dev/zero of=/swapfile bs=1M count=1024"
 
   - name: "Make the swapfile a valid swap"
     become: true
+    become_user: "{{ aiida_root_user }}"
     command: "mkswap /swapfile"
 
   - name: "Use the swapfile"
     become: true
+    become_user: "{{ aiida_root_user }}"
     command: "swapon /swapfile"
 
   - name: "Put a line in fstab to ensure swap is used at boot time"
     become: true
+    become_user: "{{ aiida_root_user }}"
     lineinfile:
       path: "/etc/fstab"
       line: "/swapfile swap swap defaults 0 0"
