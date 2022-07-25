@@ -9,10 +9,11 @@ aiida_data_folder_temp: "${HOME}/.local/share/aiida"
 aiida_allow_mpi_on_root: false  # should only be set for containers
 aiida_create_swapfile: false
 aiida_apt_packages:
+- aptitude  # desirable for the apt ansible module
+- python3-pkg-resources    # required by the pip ansible module
 - vim    # required for manual verdi code/computer setup
 - ssh    # required by MPI
 - git    # useful for cloning repositories
-- python3-pkg-resources    # required by the pip ansible module
 
 # postgresql install
 aiida_postgres_user: postgres

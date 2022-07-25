@@ -1,3 +1,20 @@
 - name: conda clean
   # for a discussion on using -f, see: https://github.com/jupyter/docker-stacks/issues/861
   command: "{{ conda_exec_user }} clean --yes --all -f"
+
+# https://askubuntu.com/questions/3167/what-is-difference-between-the-options-autoclean-autoremove-and-clean
+# https://github.com/ansible/ansible/issues/38920#issuecomment-1016640378
+
+- name: apt clean
+  become: true
+  listen:
+  - apt clean
+  apt:
+    autoclean: true
+
+- name: apt autoremove
+  become: true
+  listen:
+  - apt clean
+  apt:
+    autoremove: true

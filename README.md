@@ -59,6 +59,29 @@ If you want to install SLURM and use it as the scheduler, you can use e.g.:
       aiida_conda_code_computer: local_slurm_conda
 ```
 
+### Disk optimisation
+
+To optimise the disk usage, before packaging, there are a few extra steps you can take.
+These are not included in the role, since they are not idempotent, and so should only be run after a full build:
+
+```yaml
+- name: Run the equivalent of "apt-get clean"
+  apt:
+    clean: yes
+- name: wipe apt lists
+  become: true
+  command: "rm -rf /var/lib/apt/lists/*"
+- name: wipe user cache
+  file:
+    state: absent
+    path: "~/.cache"
+- name: wipe root cache
+  become: true
+  file:
+    state: absent
+    path: "~/.cache"
+```
+
 ## Usage
 
 ### Environment management
@@ -228,6 +251,7 @@ Please direct inquiries regarding Quantum Mobile and associated ansible roles to
 - rest api service
 - check everything still works with non-root user install
 - migrate tasks from `marvel-nccr.simulationbase` (understand `hostname.yml`, which is non-container only, and `clean.yml`)
+  - double-check when to use `apt: clean` and `apt: upgrade`, etc
 - Get <https://github.com/quanshengwu/wannier_tools> on Conda, to replace `marvel-nccr.wannier_tools`
 
 - run code tests (how to check success <https://github.com/aiidateam/aiida-common-workflows/issues/289>?):

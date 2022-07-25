@@ -7,6 +7,7 @@
     update_cache: true
     cache_valid_time: 3600
     name: "{{ aiida_apt_packages }}"
+  notify: apt clean
 
 - name: ensure that {{ aiida_temp_folder }} directory exists
   ansible.builtin.file:
